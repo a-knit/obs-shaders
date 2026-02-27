@@ -1,8 +1,4 @@
-float edgeWidth = 3.0; // Neon edge width
-float caAmountBase = 0.003;
-float glAmount = 0.9975;
-float glStrength = 0.99850;
-float colorOffsetStrength = 3.0;
+
 
 // Function to convert RGB to luminance
 float luminance(vec3 color) {
@@ -31,6 +27,12 @@ vec3 getEffectedColor(vec2 baseUv, float time, vec2 resolution, float caAmount) 
 }
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
+    float edgeWidth = 3.0; // Neon edge width
+    float caAmountBase = 0.003;
+    float glAmount = 0.9975;
+    float glStrength = 0.99850;
+    float colorOffsetStrength = 3.0;
+
     vec2 uv = fragCoord.xy;
     float time = builtin_elapsed_time;
     float caAmount = caAmountBase * cos(time) * colorOffsetStrength;
