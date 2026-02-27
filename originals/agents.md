@@ -39,6 +39,9 @@ float4 render(float2 uv) {
 
 5. Preserve shader logic and constants unless compatibility requires changes.
 6. Keep source attribution comments when available, e.g. `// original - <url>`.
+7. Move global float state into `mainImage` locals when converting.
+- Prefer local `float` declarations inside `mainImage` rather than mutable/global shader-scope floats.
+- Example: see `originals/rainbow_melt.glsl` -> `src/rainbow_melt.glsl`, where globals like `edgeWidth`, `caAmountBase`, `glAmount`, `glStrength`, and `colorOffsetStrength` are defined locally in `mainImage`, and derived values like `caAmount` are computed there.
 
 ## Pixel-size and resolution-sensitive code
 
@@ -69,6 +72,7 @@ For the existing cartoon conversion, the final shader keeps:
 - Find matching converted file in `src/` first; follow its style.
 - Do mechanical replacements (`iTime`, `iResolution`, `iChannel0`) first.
 - Normalize UV handling to this repo's pattern.
+- Move global float declarations into `mainImage` locals when possible (see `rainbow_melt`).
 - Add/verify `render(float2 uv)` wrapper.
 - Confirm all texture reads use `image.Sample(builtin_texture_sampler, ...)`.
 - Confirm no remaining `iTime`, `iResolution`, `iChannel*`, or `texture(...)` unless intentionally retained.
