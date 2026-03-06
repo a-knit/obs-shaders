@@ -27,7 +27,12 @@ Use these as reference patterns before introducing new conversion styles.
 3. UV convention in this repo for most converted files:
 - If original has `vec2 uv = fragCoord.xy / iResolution.xy;`, convert to `vec2 uv = fragCoord.xy;`
 - In `render(float2 uv)`, pass normalized UV to `mainImage(output, uv)`
-4. Add a `render` entrypoint when missing:
+4. Coordinate space and mirroring rules:
+- Use one canonical coordinate space for all sampling in a shader pass.
+- If a horizontal/vertical flip is required, apply it once to a single source coordinate (`fragCoord` or `pixelCoord`) and derive all downstream coords (`uv`, offsets, kernel taps) from that transformed value.
+- Do not mix flipped and unflipped coordinates in the same pass (for example, edge taps from flipped `pixelCoord` but base color from unflipped `uv`).
+- When both pixel and normalized coordinates are needed, derive normalized UV from pixel coords after transforms: `uv = pixelCoord / builtin_uv_size.xy`.
+5. Add a `render` entrypoint when missing:
 
 ```glsl
 float4 render(float2 uv) {
@@ -37,9 +42,9 @@ float4 render(float2 uv) {
 }
 ```
 
-5. Preserve shader logic and constants unless compatibility requires changes.
-6. Keep source attribution comments when available, e.g. `// original - <url>`.
-7. Move global float state into `mainImage` locals when converting.
+6. Preserve shader logic and constants unless compatibility requires changes.
+7. Keep source attribution comments when available, e.g. `// original - <url>`.
+8. Move global float state into `mainImage` locals when converting.
 - Prefer local `float` declarations inside `mainImage` rather than mutable/global shader-scope floats.
 - Example: see `originals/rainbow_melt.glsl` -> `src/rainbow_melt.glsl`, where globals like `edgeWidth`, `caAmountBase`, `glAmount`, `glStrength`, and `colorOffsetStrength` are defined locally in `mainImage`, and derived values like `caAmount` are computed there.
 
@@ -72,6 +77,8 @@ For the existing cartoon conversion, the final shader keeps:
 - Find matching converted file in `src/` first; follow its style.
 - Do mechanical replacements (`iTime`, `iResolution`, `iChannel0`) first.
 - Normalize UV handling to this repo's pattern.
+- Confirm all texture reads and neighborhood taps use the same orientation (all flipped or all unflipped).
+- If a flip is present, confirm it is applied once and that `uv` is derived from the transformed coordinate.
 - Move global float declarations into `mainImage` locals when possible (see `rainbow_melt`).
 - Add/verify `render(float2 uv)` wrapper.
 - Confirm all texture reads use `image.Sample(builtin_texture_sampler, ...)`.
